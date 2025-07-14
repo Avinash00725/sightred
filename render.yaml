@@ -1,9 +1,0 @@
-services:
-  - type: web
-    name: sightred
-    runtime: python
-    buildCommand: ./build.sh
-    startCommand: python main.py
-    envVars:
-      - key: FLASK_ENV
-        value: production
