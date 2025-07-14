@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-md mx-auto mt-10 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+  <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-gray-100">
+    Search Reddit Posts
+  </h2>
+
+  <form method="GET" action="{{ url_for('main.subreddit', name='placeholder') }}" onsubmit="updateAction(event)">
+    <div class="mb-4">
+      <label for="subreddit" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Subreddit</label>
+      <input
+        type="text"
+        name="subreddit"
+        id="subreddit"
+        required
+        class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
+        placeholder="e.g. Python"
+      >
+    </div>
+
+    <div class="mb-6">
+      <label for="keyword" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Keyword</label>
+      <input
+        type="text"
+        name="keyword"
+        id="keyword"
+        required
+        class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
+        placeholder="e.g. web scraping"
+      >
+    </div>
+
+    <button
+      type="submit"
+      class="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-md transition duration-200"
+    >
+      Search
+    </button>
+  </form>
+</div>
+
+<script>
+function updateAction(event) {
+  const subreddit = document.getElementById('subreddit').value;
+  const keyword = document.getElementById('keyword').value;
+  const form = event.target;
+
+  if (subreddit && keyword) {
+    form.action = `/subreddit/${encodeURIComponent(subreddit)}?q=${encodeURIComponent(keyword)}`;
+  } else {
+    event.preventDefault();
+    alert('Please fill both fields');
+  }
+}
+</script>
+{% endblock %}

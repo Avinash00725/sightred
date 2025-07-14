@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Reddit NLP App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Tailwind CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen flex flex-col">
+
+  <!-- Navbar -->
+  <nav class="bg-gray-800 text-white px-6 py-4 shadow">
+    <div class="container mx-auto flex justify-between items-center">
+      <!-- Left Links -->
+      <div class="space-x-10">
+        <a href="{{ url_for('main.home') }}" class="text-black hover:text-indigo-400">Home</a>
+        <a href="{{ url_for('main.dashboard') }}" class="text-black hover:text-indigo-400">Dashboard</a>
+        <a href="{{ url_for('main.recommendations') }}" class="text-black hover:text-indigo-400">Recommendations</a>
+      </div>
+  
+      <!-- Right Side (User Info) -->
+      <div class="space-x-4">
+        {% if current_user.is_authenticated %}
+          <span class="text-black text-sm">Welcome, {{ current_user.username }}!</span>
+          <a href="{{ url_for('auth.logout') }}" class="text-black hover:text-red-400">Logout</a>
+        {% else %}
+          <a href="{{ url_for('auth.login') }}" class="text-black hover:text-green-400">Login</a>
+          <a href="{{ url_for('auth.register') }}" class="text-black hover:text-blue-400">Register</a>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+  
+
+  <!-- Page Content -->
+  <main class="flex-grow container mx-auto px-4 py-8">
+    {% block content %}
+    {% endblock %}
+  </main>
+
+</body>
+</html>

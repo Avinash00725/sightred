@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-900 text-white px-6 py-10">
+  <div class="max-w-4xl mx-auto">
+    <h2 class="text-3xl font-bold mb-6 text-center">Posts from r/{{ subreddit_name }}</h2>
+
+    <ul class="space-y-4">
+      {% for post in posts %}
+        <li class="bg-gray-800 p-4 rounded-lg shadow hover:shadow-lg transition">
+          <a href="{{ post.url }}" target="_blank" class="text-xl text-blue-400 hover:underline font-semibold">
+            {{ post.title }}
+          </a>
+          <div class="text-sm text-gray-400 mt-2">
+            Score: {{ post.score }} | Author: {{ post.author }}
+          </div>
+        </li>
+      {% else %}
+        <li class="bg-red-800 p-4 rounded-lg text-center">
+          No posts found for this subreddit.
+        </li>
+      {% endfor %}
+    </ul>
+
+    <div class="mt-8 text-center">
+      <a href="{{ url_for('main.home') }}" class="text-yellow-400 hover:underline">← Back to Home</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

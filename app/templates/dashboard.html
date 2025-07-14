@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+  <h2 class="text-2xl font-bold mb-4">Welcome, {{ current_user.username }}</h2>
+
+  <h3 class="text-xl font-semibold mt-6 mb-2">Recent Searches</h3>
+  <ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+    {% for s in searches %}
+      <li>
+        <span class="font-medium">{{ s.timestamp.strftime('%Y-%m-%d %H:%M') }}</span> —
+        <span class="text-indigo-600 dark:text-indigo-400">r/{{ s.subreddit }}</span> —
+        "<span class="italic">{{ s.keyword }}</span>"
+      </li>
+    {% else %}
+      <li>No recent searches found.</li>
+    {% endfor %}
+  </ul>
+
+  <h3 class="text-xl font-semibold mt-8 mb-4">Keyword Frequency</h3>
+  <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg shadow-sm">
+    <canvas id="keywordChart" class="w-full h-64"></canvas>
+  </div>
+</div>
+
+<script>
+  const ctx = document.getElementById('keywordChart').getContext('2d');
+  const data = {{ chart_data | safe }};
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: data.labels,
+      datasets: [{
+        label: 'Search Frequency',
+        data: data.values,
+        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            stepSize: 1
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          labels: {
+            color: '#374151'  // Tailwind gray-700
+          }
+        }
+      }
+    }
+  });
+</script>
+{% endblock %}

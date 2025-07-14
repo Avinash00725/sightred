@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Environment
+.env
+.venv/
+env/
+venv/
+*.env
+
+# Pytest
+.pytest_cache/
+
+# Jupyter / IPython
+.ipynb_checkpoints/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
+
+# Docker
+*.log
+*.pid
+docker-compose.override.yml
+
+# DB
+*.sqlite3
+instance/
+
+# Flask/Migrations
+migrations/
