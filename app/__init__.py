@@ -11,11 +11,11 @@ db = SQLAlchemy()
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
 
-# ✅ Reddit instance - don't keep secrets hardcoded in production!
+import os
 reddit = praw.Reddit(
-    client_id="-OY_VDNQWsBKeQEYyRlAsw",
-    client_secret="HbKEJ9seAovAAH76qaDtC8Daffc35w",
-    user_agent="health_sentinel_v1"
+    client_id=os.getenv("REDDIT_CLIENT_ID"),
+    client_secret=os.getenv("REDDIT_CLIENT_SECRET"),
+    user_agent=os.getenv("REDDIT_USER_AGENT")
 )
 
 def create_app():
