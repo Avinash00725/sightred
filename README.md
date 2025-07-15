@@ -29,5 +29,5 @@ To run the project locally:
 1. Clone the repository: `git clone <repository-url>`
 2. Install dependencies: `pip install -r requirements.txt`
 3. Configure Reddit API credentials in a `.env` file.
-4. Run the Flask app: `python app.py`
+4. Run the Flask app: `python main.py`
 5. Access the app at `http://localhost:5000`.
