@@ -1,6 +1,6 @@
 # Keyword-Based Reddit Recommendation System
 
-## 📘 Project Overview
+## Project Overview
 
 This project is a personalized recommendation system built using **Flask**, **PRAW** (Python Reddit API Wrapper), **scikit-learn**, and **spaCy**. It enables users to:
 
@@ -8,7 +8,7 @@ This project is a personalized recommendation system built using **Flask**, **PR
 - Receive recommended keywords based on their search history.
 - View the latest Reddit posts related to their queries.
 
-## ⚙️ How It Works
+## How It Works
 
 1. **User Search**:
    - Users input a keyword, which is stored in a database for tracking search history.
@@ -23,7 +23,7 @@ This project is a personalized recommendation system built using **Flask**, **PR
    - Employs **spaCy** for extracting named entities from post titles.
    - Optionally uses **textblob** or **spaCy** for basic sentiment analysis of posts.
 
-## 🚀 Usage
+## Usage
 
 To run the project locally:
 1. Clone the repository: `git clone <repository-url>`
