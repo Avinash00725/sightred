@@ -1,50 +1,10 @@
-# # app/recommender.py
-
-# from sklearn.feature_extraction.text import TfidfVectorizer
-# from sklearn.metrics.pairwise import cosine_similarity
-# from app.models import Search
-# from flask_login import current_user
-
-# def recommend_keywords():
-#     # Get all past search keywords of the current user
-#     searches = Search.query.filter_by(user_id=current_user.id).all()
-#     keywords = [s.keyword for s in searches]
-
-#     # Not enough data for recommendation
-#     if len(set(keywords)) < 2:
-#         return []
-
-#     # Convert keywords into TF-IDF vectors
-#     vectorizer = TfidfVectorizer()
-#     tfidf_matrix = vectorizer.fit_transform(keywords)
-
-#     # Compute cosine similarity between the most recent keyword and the rest
-#     sim_matrix = cosine_similarity(tfidf_matrix)
-#     last_idx = len(keywords) - 1  # Most recent keyword
-#     similarity_scores = list(enumerate(sim_matrix[last_idx]))
-
-#     # Sort by similarity score, skip the last entry itself (self match)
-#     sorted_scores = sorted(similarity_scores, key=lambda x: x[1], reverse=True)
-#     sorted_scores = [score for score in sorted_scores if score[0] != last_idx]
-
-#     # Get top 5 recommendations, excluding duplicates
-#     recommended = []
-#     seen = set()
-#     for idx, _ in sorted_scores:
-#         keyword = keywords[idx]
-#         if keyword not in seen:
-#             recommended.append(keyword)
-#             seen.add(keyword)
-#         if len(recommended) == 5:
-#             break
-
-#     return recommended
-
-
 import praw
 import os
 import random
 from flask import session
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
 
 # Initialize Reddit API
 reddit = praw.Reddit(
@@ -67,21 +27,40 @@ def recommend_posts():
                 trending_posts.append({
                     "title": post.title,
                     "url": post.url,
-                    "subreddit": sub
+                    "subreddit": sub,
+                    "score": post.score,
+                    "author": str(post.author),
+                    "created": post.created_utc
                 })
 
         return {"search_based_posts": None, "trending_posts": trending_posts}
 
     else:
-        # Show posts for searched keywords
+        # Use TF-IDF on searched keywords
+        vectorizer = TfidfVectorizer()
+        tfidf_matrix = vectorizer.fit_transform(searched_keywords)
+
+        # Compare last search with all previous
+        last_query_vec = tfidf_matrix[-1]
+        similarities = cosine_similarity(last_query_vec, tfidf_matrix[:-1]).flatten()
+
+        if similarities.size > 0:
+            most_similar_idx = np.argmax(similarities)
+            similar_keyword = searched_keywords[most_similar_idx]
+        else:
+            similar_keyword = searched_keywords[-1]
+
+        # Fetch posts for both latest keyword + similar one
         search_based_posts = []
-        for kw in searched_keywords[-3:]:  # limit to last 3 searches
+        for kw in [searched_keywords[-1], similar_keyword]:
             for post in reddit.subreddit("all").search(kw, limit=3):
                 search_based_posts.append({
                     "title": post.title,
                     "url": post.url,
-                    "subreddit": post.subreddit.display_name
+                    "subreddit": post.subreddit.display_name,
+                    "score": post.score,
+                    "author": str(post.author),
+                    "created": post.created_utc
                 })
 
         return {"search_based_posts": search_based_posts, "trending_posts": None}
-
