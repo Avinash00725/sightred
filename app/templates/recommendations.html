@@ -1,23 +1,92 @@
 {% extends 'base.html' %}
-
 {% block content %}
-<div class="max-w-2xl mx-auto mt-10 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-  <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4 text-center">
-    Recommended Keywords Based on Your Searches
+<div class="max-w-4xl mx-auto mt-10 bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md">
+  <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-8 text-center">
+    📚 Recommended Posts
   </h2>
 
-  {% if keyword_recs %}
-    <ul class="list-disc pl-6 space-y-2 text-gray-700 dark:text-gray-200">
-      {% for kw in keyword_recs %}
-        <li>{{ kw }}</li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p class="text-gray-600 dark:text-gray-400">No keyword recommendations available yet.</p>
+  <!-- PAST SEARCH POSTS -->
+  {% if past_search_posts %}
+    <div class="mb-10">
+      <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-1 flex items-center">
+        <span class="text-2xl mr-2">🔍</span> From Your Past Searches
+      </h3>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Posts from your earlier search topics</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {% for post in past_search_posts %}
+          <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:shadow-md transition">
+            <a href="{{ post.url }}" target="_blank" class="text-indigo-600 dark:text-indigo-400 hover:underline font-semibold">
+              {{ post.title[:80] }}{% if post.title|length > 80 %}...{% endif %}
+            </a>
+            <div class="mt-2 flex justify-between text-xs text-gray-600 dark:text-gray-400">
+              <span class="bg-indigo-100 dark:bg-indigo-900 px-2 py-1 rounded">r/{{ post.subreddit }}</span>
+              <span>⬆️ {{ post.score }}</span>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
   {% endif %}
 
-  <div class="mt-6 text-center">
-    <a href="{{ url_for('main.dashboard') }}" class="inline-block px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition duration-200">
+  <!-- NEW POSTS -->
+  {% if new_posts %}
+    <div class="mb-10">
+      <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-1 flex items-center">
+        <span class="text-2xl mr-2">✨</span> Fresh & New
+      </h3>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Latest posts matching your recent searches</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {% for post in new_posts %}
+          <div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-600 hover:shadow-md transition">
+            <a href="{{ post.url }}" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline font-semibold">
+              {{ post.title[:80] }}{% if post.title|length > 80 %}...{% endif %}
+            </a>
+            <div class="mt-2 flex justify-between text-xs text-gray-600 dark:text-gray-400">
+              <span class="bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded">r/{{ post.subreddit }}</span>
+              <span>⬆️ {{ post.score }}</span>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- TRENDING POSTS -->
+  {% if trending_posts %}
+    <div class="mb-10">
+      <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-1 flex items-center">
+        <span class="text-2xl mr-2">🔥</span> Trending Now
+      </h3>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Popular posts across Reddit this week</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {% for post in trending_posts %}
+          <div class="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-600 hover:shadow-md transition">
+            <a href="{{ post.url }}" target="_blank" class="text-amber-600 dark:text-amber-400 hover:underline font-semibold">
+              {{ post.title[:80] }}{% if post.title|length > 80 %}...{% endif %}
+            </a>
+            <div class="mt-2 flex justify-between text-xs text-gray-600 dark:text-gray-400">
+              <span class="bg-amber-100 dark:bg-amber-900 px-2 py-1 rounded">r/{{ post.subreddit }}</span>
+              <span>⬆️ {{ post.score }}</span>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- NO RECOMMENDATIONS -->
+  {% if not past_search_posts and not new_posts and not trending_posts %}
+    <div class="text-center py-12">
+      <p class="text-gray-600 dark:text-gray-400 text-lg mb-4">No recommendations yet.</p>
+      <p class="text-gray-500 dark:text-gray-500 mb-6">Start searching to get personalized recommendations!</p>
+      <a href="{{ url_for('main.home') }}" class="inline-block px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition duration-200">
+        Go to Search
+      </a>
+    </div>
+  {% endif %}
+
+  <div class="mt-10 pt-6 border-t border-gray-200 dark:border-gray-700 text-center">
+    <a href="{{ url_for('main.dashboard') }}" class="inline-block px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition duration-200">
       ← Back to Dashboard
     </a>
   </div>

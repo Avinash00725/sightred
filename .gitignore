@@ -21,8 +21,11 @@ venv/
 .ipynb_checkpoints/
 
 # OS-specific
-.DS_Store
-Thumbs.db
+.
+*.db
+*.sqlite
+__pycache__/
+venv/
 
 # VS Code
 .vscode/
@@ -38,3 +41,8 @@ instance/
 
 # Flask/Migrations
 migrations/
+
+*.db
+.env
+__pycache__/
+*.pyc

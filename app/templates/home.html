@@ -7,28 +7,44 @@
   </h2>
 
   <form method="GET" action="{{ url_for('main.subreddit', name='placeholder') }}" onsubmit="updateAction(event)">
-    <div class="mb-4">
+    <div class="mb-4 relative">
       <label for="subreddit" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Subreddit</label>
       <input
         type="text"
         name="subreddit"
         id="subreddit"
         required
+        autocomplete="off"
         class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
         placeholder="e.g. Python"
+        oninput="handleSubredditInput(event)"
       >
+      <!-- Subreddit Suggestions Dropdown -->
+      <div 
+        id="subreddit-suggestions" 
+        class="hidden absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-64 overflow-y-auto"
+      >
+      </div>
     </div>
 
-    <div class="mb-6">
+    <div class="mb-6 relative">
       <label for="keyword" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Keyword</label>
       <input
         type="text"
         name="keyword"
         id="keyword"
         required
+        autocomplete="off"
         class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
         placeholder="e.g. web scraping"
+        oninput="handleKeywordInput(event)"
       >
+      <!-- Keyword Suggestions Dropdown -->
+      <div 
+        id="keyword-suggestions" 
+        class="hidden absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-64 overflow-y-auto"
+      >
+      </div>
     </div>
 
     <button
@@ -41,6 +57,8 @@
 </div>
 
 <script>
+let suggestionTimeout;
+
 function updateAction(event) {
   const subreddit = document.getElementById('subreddit').value;
   const keyword = document.getElementById('keyword').value;
@@ -53,5 +71,97 @@ function updateAction(event) {
     alert('Please fill both fields');
   }
 }
+
+function handleSubredditInput(event) {
+  const query = event.target.value.trim();
+  const suggestionsDiv = document.getElementById('subreddit-suggestions');
+  
+  clearTimeout(suggestionTimeout);
+  
+  if (query.length < 1) {
+    suggestionsDiv.classList.add('hidden');
+    return;
+  }
+
+  // Debounce API calls
+  suggestionTimeout = setTimeout(() => {
+    fetchSuggestions(query, 'subreddit', suggestionsDiv);
+  }, 300);
+}
+
+function handleKeywordInput(event) {
+  const query = event.target.value.trim();
+  const suggestionsDiv = document.getElementById('keyword-suggestions');
+  
+  clearTimeout(suggestionTimeout);
+  
+  if (query.length < 1) {
+    suggestionsDiv.classList.add('hidden');
+    return;
+  }
+
+  // Debounce API calls
+  suggestionTimeout = setTimeout(() => {
+    fetchSuggestions(query, 'keyword', suggestionsDiv);
+  }, 300);
+}
+
+function fetchSuggestions(query, type, suggestionsDiv) {
+  fetch(`/api/suggestions?q=${encodeURIComponent(query)}&type=${type}`)
+    .then(response => response.json())
+    .then(suggestions => {
+      displaySuggestions(suggestions, type, suggestionsDiv);
+    })
+    .catch(error => {
+      console.error('Error fetching suggestions:', error);
+      suggestionsDiv.classList.add('hidden');
+    });
+}
+
+function displaySuggestions(suggestions, type, suggestionsDiv) {
+  if (suggestions.length === 0) {
+    suggestionsDiv.classList.add('hidden');
+    return;
+  }
+
+  suggestionsDiv.innerHTML = '';
+  suggestionsDiv.classList.remove('hidden');
+
+  suggestions.forEach(item => {
+    const div = document.createElement('div');
+    div.class = 'px-4 py-2 cursor-pointer hover:bg-indigo-100 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200';
+    
+    if (type === 'subreddit') {
+      const displayText = item.subscribers ? `r/${item.name}` : item.name;
+      const subscriberText = item.subscribers ? ` (${(item.subscribers / 1000).toFixed(0)}k)` : '';
+      div.innerHTML = `<span class="font-medium">${displayText}</span><span class="text-sm text-gray-500 dark:text-gray-400">${subscriberText}</span>`;
+      div.onclick = () => selectSubreddit(item.name);
+    } else {
+      div.innerHTML = `<span>${item.keyword}</span>`;
+      div.onclick = () => selectKeyword(item.keyword);
+    }
+    
+    div.className = 'px-4 py-2 cursor-pointer hover:bg-indigo-100 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 border-b border-gray-200 dark:border-gray-600 last:border-b-0';
+    suggestionsDiv.appendChild(div);
+  });
+}
+
+function selectSubreddit(name) {
+  document.getElementById('subreddit').value = name;
+  document.getElementById('subreddit-suggestions').classList.add('hidden');
+}
+
+function selectKeyword(keyword) {
+  document.getElementById('keyword').value = keyword;
+  document.getElementById('keyword-suggestions').classList.add('hidden');
+}
+
+// Hide suggestions when clicking outside
+document.addEventListener('click', (e) => {
+  if (e.target.id !== 'subreddit' && e.target.id !== 'keyword') {
+    document.getElementById('subreddit-suggestions').classList.add('hidden');
+    document.getElementById('keyword-suggestions').classList.add('hidden');
+  }
+});
 </script>
 {% endblock %}

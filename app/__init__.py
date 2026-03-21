@@ -5,17 +5,22 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from config import Config
 import praw
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Initialize extensions
 db = SQLAlchemy()
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
 
-# ✅ Reddit instance - don't keep secrets hardcoded in production!
+# ✅ Reddit instance - USES ENVIRONMENT VARIABLES (NOT HARDCODED!)
 reddit = praw.Reddit(
-    client_id="-OY_VDNQWsBKeQEYyRlAsw",
-    client_secret="HbKEJ9seAovAAH76qaDtC8Daffc35w",
-    user_agent="health_sentinel_v1"
+    client_id=os.getenv("REDDIT_CLIENT_ID"),
+    client_secret=os.getenv("REDDIT_CLIENT_SECRET"),
+    user_agent=os.getenv("REDDIT_USER_AGENT", "sightred/1.0")
 )
 
 def create_app():
