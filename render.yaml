@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: sightred
+    runtime: python
+    runtimeVersion: 3.11.9
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -w 4 -b 0.0.0.0:$PORT wsgi:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
