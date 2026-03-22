@@ -2,9 +2,6 @@ import praw
 import os
 from flask import session
 from flask_login import current_user
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-import numpy as np
 from datetime import datetime
 from functools import lru_cache
 
@@ -15,6 +12,23 @@ reddit = praw.Reddit(
     user_agent=os.getenv("REDDIT_USER_AGENT"),
     read_only=True  # Read-only mode for faster API calls
 )
+
+def simple_string_similarity(str1, str2):
+    """
+    Simple string similarity based on common words.
+    Returns a score between 0 and 1.
+    """
+    words1 = set(str1.lower().split())
+    words2 = set(str2.lower().split())
+    
+    if not words1 or not words2:
+        return 0.0
+    
+    intersection = len(words1 & words2)
+    union = len(words1 | words2)
+    
+    return intersection / union if union > 0 else 0.0
+
 
 def recommend_posts():
     """
@@ -90,24 +104,24 @@ def recommend_posts():
     # Get most recent keywords
     recent_keywords = unique_keywords[:3]
     
-    # Use TF-IDF similarity to rank which keywords are most relevant
+    # Use simple string similarity to rank which keywords are most relevant
     if len(unique_keywords) > 1:
         try:
-            vectorizer = TfidfVectorizer()
-            tfidf_matrix = vectorizer.fit_transform(unique_keywords)
+            last_keyword = unique_keywords[-1]
+            similarities = []
             
-            # Compare last query with others
-            last_query_vec = tfidf_matrix[-1]
-            all_vecs = tfidf_matrix[:-1]
+            for i, kw in enumerate(unique_keywords[:-1]):
+                sim = simple_string_similarity(last_keyword, kw)
+                if sim > 0.2:  # Only consider keywords with at least 20% similarity
+                    similarities.append((i, sim, kw))
             
-            if all_vecs.shape[0] > 0:
-                similarities = cosine_similarity(last_query_vec, all_vecs).flatten()
-                
-                # Get top similar keywords
-                top_similar_indices = np.argsort(similarities)[::-1][:2]
-                for idx in top_similar_indices:
-                    if idx < len(unique_keywords) - 1:
-                        recent_keywords.append(unique_keywords[idx])
+            # Sort by similarity descending
+            similarities.sort(key=lambda x: x[1], reverse=True)
+            
+            # Add top 2 similar keywords
+            for _, _, kw in similarities[:2]:
+                if kw not in recent_keywords:
+                    recent_keywords.append(kw)
         except Exception as e:
             print(f"Error calculating similarity: {e}")
     
